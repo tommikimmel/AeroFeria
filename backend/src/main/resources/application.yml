@@ -1,0 +1,54 @@
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+
+spring:
+  application:
+    name: aeroferia-api
+  threads:
+    virtual:
+      enabled: true
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/aeroferia_db}
+    username: ${SPRING_DATASOURCE_USERNAME:aeroferia_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:aeroferia_dev_secret_pass_2026}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 30000
+      connection-timeout: 20000
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  servlet:
+    multipart:
+      max-file-size: ${MAX_FILE_SIZE_MB:5}MB
+      max-request-size: 20MB
+
+# Configuración personalizada de la plataforma AeroFeria
+aeroferia:
+  jwt:
+    secret: ${JWT_SECRET:aeroferia_ultra_secure_jwt_token_secret_2026_rc_aeromodelling_key_minimum_256_bits_length!}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+  admin:
+    initial-email: ${INITIAL_ADMIN_EMAIL:admin@aeroferia.com}
+    initial-password: ${INITIAL_ADMIN_PASSWORD:AdminAeroFeria2026!}
+    initial-name: ${INITIAL_ADMIN_NAME:Administrador General}
+    initial-phone: ${INITIAL_ADMIN_PHONE:5491100000000}
+  upload:
+    dir: ${UPLOAD_DIR:/app/uploads}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
