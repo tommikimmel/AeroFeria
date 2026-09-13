@@ -1,0 +1,57 @@
+# Operating System Files
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+.DS_Store
+
+# IDE and Editor Files
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Environment and Secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Java & Maven (Backend)
+**/target/
+**/*.class
+**/*.jar
+**/*.war
+**/*.ear
+.mvn/wrapper/maven-wrapper.jar
+**/.flattened-pom.xml
+
+# Node.js & Angular (Frontend)
+**/node_modules/
+**/.angular/
+**/dist/
+**/.cache/
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/.pnpm-debug.log*
+
+# Docker Volumes and Local Uploads
+uploads/
+**/uploads/*
+!**/uploads/.gitkeep
+pg_data/
+**/pg_data/
+
+# Log Files
+*.log
+logs/
+**/logs/
