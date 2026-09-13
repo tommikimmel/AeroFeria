@@ -22,8 +22,9 @@ import { CategoryTree } from '../../core/models/category.model';
 
         <h1 class="text-4xl md:text-6xl font-display font-extrabold tracking-tight text-zinc-950 dark:text-white mb-4 leading-tight">
           Compra y vende 
-          <span class="text-zinc-950 dark:text-fluor underline decoration-fluor/50 underline-offset-8 transition-all duration-300 inline-block min-w-[150px] sm:min-w-[200px] text-center sm:text-left">
-            {{ currentHeroWord() }}
+          <span class="inline-flex items-baseline text-zinc-950 dark:text-fluor underline decoration-fluor/50 underline-offset-8 transition-colors">
+            <span>{{ displayText() }}</span>
+            <span class="inline-block w-[3px] h-[0.85em] ml-1 bg-fluor animate-pulse rounded-sm align-middle"></span>
           </span> 
           con la velocidad de 
           <span class="text-zinc-950 dark:text-fluor underline decoration-fluor/50 underline-offset-8">
@@ -348,11 +349,10 @@ export class CatalogComponent implements OnInit, OnDestroy {
 
   @ViewChild('carouselContainer') carouselContainer?: ElementRef<HTMLDivElement>;
 
-  // Rotador Dinámico del Hero Section
+  // Efecto Typewriter del Hero Section
   heroWords = ['Avión', 'Helicóptero', 'Dron', 'Aeromodelo', 'Repuestos', 'Autos'];
-  currentWordIndex = signal<number>(0);
-  currentHeroWord = computed(() => this.heroWords[this.currentWordIndex()]);
-  private wordRotationTimer: any;
+  displayText = signal<string>('Avión');
+  private typewriterTimer: any;
 
   categories = signal<CategoryTree[]>([]);
   publications = signal<PublicationCard[]>([]);
@@ -390,24 +390,54 @@ export class CatalogComponent implements OnInit, OnDestroy {
   });
 
   ngOnInit(): void {
-    this.startHeroWordRotation();
+    this.startTypewriter();
     this.loadCategories();
     this.loadPublications();
   }
 
   ngOnDestroy(): void {
-    if (this.wordRotationTimer) {
-      clearInterval(this.wordRotationTimer);
+    if (this.typewriterTimer) {
+      clearTimeout(this.typewriterTimer);
     }
     if (this.searchDebounceTimer) {
       clearTimeout(this.searchDebounceTimer);
     }
   }
 
-  startHeroWordRotation(): void {
-    this.wordRotationTimer = setInterval(() => {
-      this.currentWordIndex.update(i => (i + 1) % this.heroWords.length);
-    }, 2200);
+  startTypewriter(): void {
+    let wordIndex = 0;
+    let charIndex = this.heroWords[0].length;
+    let isDeleting = true;
+
+    const typeStep = () => {
+      const currentWord = this.heroWords[wordIndex];
+
+      if (isDeleting) {
+        charIndex--;
+        this.displayText.set(currentWord.substring(0, charIndex));
+      } else {
+        charIndex++;
+        this.displayText.set(currentWord.substring(0, charIndex));
+      }
+
+      let speed = isDeleting ? 45 : 95;
+
+      if (!isDeleting && charIndex === currentWord.length) {
+        // Palabra completa escrita, pausar antes de borrar
+        speed = 1800;
+        isDeleting = true;
+      } else if (isDeleting && charIndex === 0) {
+        // Palabra borrada completamente, pasar a la siguiente palabra
+        isDeleting = false;
+        wordIndex = (wordIndex + 1) % this.heroWords.length;
+        speed = 280;
+      }
+
+      this.typewriterTimer = setTimeout(typeStep, speed);
+    };
+
+    // Pausa inicial en la primera palabra cargada
+    this.typewriterTimer = setTimeout(typeStep, 1500);
   }
 
   scrollCarousel(direction: 'left' | 'right'): void {
