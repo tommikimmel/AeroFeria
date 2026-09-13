@@ -69,6 +69,18 @@ public class ClientBFFController {
         return ResponseEntity.ok(publicationService.recordWhatsAppClick(id));
     }
 
+    @PostMapping("/publications")
+    public ResponseEntity<PublicationDetailDto> createPublication(
+            @jakarta.validation.Valid @RequestBody CreatePublicationDto dto,
+            java.security.Principal principal
+    ) {
+        if (principal == null) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.status(org.springframework.http.HttpStatus.CREATED)
+                .body(publicationService.createPublication(dto, principal.getName()));
+    }
+
     @GetMapping("/categories")
     public ResponseEntity<List<CategoryTreeDto>> getCategories() {
         return ResponseEntity.ok(categoryService.getCategoryTree());
