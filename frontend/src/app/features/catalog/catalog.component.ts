@@ -1,9 +1,9 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CatalogService } from '../../core/services/catalog.service';
-import { PublicationCard } from '../../core/models/publication.model';
+import { ItemCondition, Currency, PublicationCard } from '../../core/models/publication.model';
 import { CategoryTree } from '../../core/models/category.model';
 
 @Component({
@@ -11,7 +11,8 @@ import { CategoryTree } from '../../core/models/category.model';
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
   template: `
-    <div class="space-y-10 pb-16">
+    <div class="space-y-8 pb-16">
+      
       <!-- Hero Section Minimalista estilo Apple -->
       <section class="relative pt-6 md:pt-12 text-center max-w-4xl mx-auto px-4">
         <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-fluor/10 border border-fluor/30 text-xs font-display font-bold text-zinc-900 dark:text-fluor mb-6">
@@ -20,7 +21,14 @@ import { CategoryTree } from '../../core/models/category.model';
         </div>
 
         <h1 class="text-4xl md:text-6xl font-display font-extrabold tracking-tight text-zinc-950 dark:text-white mb-4 leading-tight">
-          Compra y vende aeromodelos con la velocidad de <span class="text-zinc-950 dark:text-fluor underline decoration-fluor/50 underline-offset-8">WhatsApp</span>
+          Compra y vende 
+          <span class="text-zinc-950 dark:text-fluor underline decoration-fluor/50 underline-offset-8 transition-all duration-300 inline-block min-w-[150px] sm:min-w-[200px] text-center sm:text-left">
+            {{ currentHeroWord() }}
+          </span> 
+          con la velocidad de 
+          <span class="text-zinc-950 dark:text-fluor underline decoration-fluor/50 underline-offset-8">
+            WhatsApp
+          </span>
         </h1>
         
         <p class="text-base md:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto font-sans">
@@ -55,33 +63,136 @@ import { CategoryTree } from '../../core/models/category.model';
           </div>
         </div>
 
-        <!-- Chips de Categorías Técnicas -->
-        <div class="flex items-center justify-center gap-2 overflow-x-auto py-6 no-scrollbar">
+        <!-- Carrusel de Filtros Rápidos de Categorías (Optimizado para Desktop y Móvil) -->
+        <div class="relative max-w-5xl mx-auto mt-6">
+          
+          <!-- Botón Scroll Izquierda (Desktop) -->
           <button 
             type="button"
-            (click)="selectCategory(null)"
-            [class.bg-fluor]="selectedCategorySlug() === null"
-            [class.text-carbon-950]="selectedCategorySlug() === null"
-            [class.bg-white]="selectedCategorySlug() !== null"
-            [class.dark:bg-carbon-900]="selectedCategorySlug() !== null"
-            [class.text-zinc-700]="selectedCategorySlug() !== null"
-            [class.dark:text-zinc-300]="selectedCategorySlug() !== null"
-            class="px-4 py-2 rounded-full text-xs font-display font-bold border border-black/5 dark:border-carbon-border shadow-sm hover:border-fluor/40 active:scale-95 transition-all duration-200 shrink-0">
-            Todos
+            (click)="scrollCarousel('left')"
+            aria-label="Desplazar a la izquierda"
+            class="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white dark:bg-carbon-850 border border-black/10 dark:border-carbon-border shadow-md items-center justify-center text-zinc-700 dark:text-zinc-200 hover:bg-fluor hover:text-carbon-950 hover:border-fluor transition-all active:scale-95">
+            <svg class="w-4 h-4 stroke-current stroke-[2.5]" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
           </button>
 
-          @for (cat of categories(); track cat.id) {
+          <!-- Contenedor Desplazable sin corte de márgenes -->
+          <div 
+            #carouselContainer
+            class="flex items-center gap-2.5 overflow-x-auto py-3 px-2 sm:px-4 no-scrollbar scroll-smooth">
+            
             <button 
               type="button"
-              (click)="selectCategory(cat.slug)"
-              [class.bg-fluor]="selectedCategorySlug() === cat.slug"
-              [class.text-carbon-950]="selectedCategorySlug() === cat.slug"
-              [class.bg-white]="selectedCategorySlug() !== cat.slug"
-              [class.dark:bg-carbon-900]="selectedCategorySlug() !== cat.slug"
-              [class.text-zinc-700]="selectedCategorySlug() !== cat.slug"
-              [class.dark:text-zinc-300]="selectedCategorySlug() !== cat.slug"
-              class="px-4 py-2 rounded-full text-xs font-display font-bold border border-black/5 dark:border-carbon-border shadow-sm hover:border-fluor/40 active:scale-95 transition-all duration-200 shrink-0">
-              {{ cat.name }}
+              (click)="selectCategory(null)"
+              [ngClass]="selectedCategorySlug() === null ? 'bg-fluor text-carbon-950' : 'bg-white dark:bg-carbon-900 text-zinc-700 dark:text-zinc-300'"
+              class="px-5 py-2.5 rounded-full text-xs font-display font-bold border border-black/5 dark:border-carbon-border shadow-sm hover:border-fluor/40 active:scale-95 transition-all shrink-0">
+              Todos
+            </button>
+
+            @for (cat of categories(); track cat.id) {
+              <button 
+                type="button"
+                (click)="selectCategory(cat.slug)"
+                [ngClass]="selectedCategorySlug() === cat.slug ? 'bg-fluor text-carbon-950' : 'bg-white dark:bg-carbon-900 text-zinc-700 dark:text-zinc-300'"
+                class="px-5 py-2.5 rounded-full text-xs font-display font-bold border border-black/5 dark:border-carbon-border shadow-sm hover:border-fluor/40 active:scale-95 transition-all shrink-0">
+                {{ cat.name }}
+              </button>
+            }
+          </div>
+
+          <!-- Botón Scroll Derecha (Desktop) -->
+          <button 
+            type="button"
+            (click)="scrollCarousel('right')"
+            aria-label="Desplazar a la derecha"
+            class="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white dark:bg-carbon-850 border border-black/10 dark:border-carbon-border shadow-md items-center justify-center text-zinc-700 dark:text-zinc-200 hover:bg-fluor hover:text-carbon-950 hover:border-fluor transition-all active:scale-95">
+            <svg class="w-4 h-4 stroke-current stroke-[2.5]" viewBox="0 0 24 24" fill="none">
+              <path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Subcategorías Rápidas (aparecen dinámicamente si hay una categoría seleccionada) -->
+        @if (activeSubcategories().length > 0) {
+          <div class="flex items-center justify-center gap-2 overflow-x-auto py-2 no-scrollbar animate-fade-in max-w-4xl mx-auto">
+            <span class="text-[11px] font-display font-semibold uppercase tracking-wider text-zinc-400 shrink-0">
+              Subtipos:
+            </span>
+            @for (sub of activeSubcategories(); track sub.id) {
+              <button 
+                type="button"
+                (click)="selectSubcategory(sub.slug)"
+                [ngClass]="selectedSubcategorySlug() === sub.slug ? 'bg-fluor text-carbon-950' : 'bg-black/5 dark:bg-carbon-850 text-zinc-700 dark:text-zinc-300'"
+                class="px-3.5 py-1.5 rounded-full text-xs font-sans font-medium hover:border-fluor/50 border border-transparent transition-all shrink-0">
+                {{ sub.name }}
+              </button>
+            }
+          </div>
+        }
+
+        <!-- Filtros Rápidos Secundarios: Vendedor, Condición, Moneda -->
+        <div class="flex flex-wrap items-center justify-center gap-2 pt-2 text-xs font-sans">
+          
+          <!-- Filtro Vendedor: Todos / Solo Tiendas / Particulares -->
+          <div class="inline-flex rounded-full bg-zinc-100 dark:bg-carbon-850 p-0.5 border border-black/5 dark:border-carbon-border">
+            <button 
+              type="button"
+              (click)="setOnlyStores(null)"
+              [ngClass]="selectedOnlyStores() === null ? 'bg-white dark:bg-carbon-900 text-zinc-950 dark:text-white shadow-sm' : 'text-zinc-500'"
+              class="px-3 py-1 rounded-full text-[11px] font-display font-bold transition-all">
+              Todos
+            </button>
+            <button 
+              type="button"
+              (click)="setOnlyStores(true)"
+              [ngClass]="selectedOnlyStores() === true ? 'bg-white dark:bg-carbon-900 text-zinc-950 dark:text-white shadow-sm' : 'text-zinc-500'"
+              class="px-3 py-1 rounded-full text-[11px] font-display font-bold transition-all flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-fluor"></span>
+              Tiendas Oficiales
+            </button>
+            <button 
+              type="button"
+              (click)="setOnlyStores(false)"
+              [ngClass]="selectedOnlyStores() === false ? 'bg-white dark:bg-carbon-900 text-zinc-950 dark:text-white shadow-sm' : 'text-zinc-500'"
+              class="px-3 py-1 rounded-full text-[11px] font-display font-bold transition-all">
+              Particulares
+            </button>
+          </div>
+
+          <!-- Filtro Condición -->
+          <select 
+            [ngModel]="selectedCondition()"
+            (ngModelChange)="onConditionChange($event)"
+            class="bg-white dark:bg-carbon-900 border border-black/10 dark:border-carbon-border rounded-full px-3 py-1.5 text-[11px] font-display font-semibold text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-1 focus:ring-fluor">
+            <option [ngValue]="null">Cualquier Estado</option>
+            <option value="NEW">Nuevo (Sin Uso)</option>
+            <option value="LIKE_NEW">Como Nuevo</option>
+            <option value="USED_GOOD">Buen Estado</option>
+            <option value="FOR_PARTS">Para Repuestos</option>
+          </select>
+
+          <!-- Filtro Moneda -->
+          <select 
+            [ngModel]="selectedCurrency()"
+            (ngModelChange)="onCurrencyChange($event)"
+            class="bg-white dark:bg-carbon-900 border border-black/10 dark:border-carbon-border rounded-full px-3 py-1.5 text-[11px] font-display font-semibold text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-1 focus:ring-fluor">
+            <option [ngValue]="null">Todas las Monedas</option>
+            <option value="USD">Dólares (USD)</option>
+            <option value="ARS">Pesos ($)</option>
+          </select>
+
+          <!-- Botón Limpiar Todos los Filtros -->
+          @if (hasActiveFilters()) {
+            <button 
+              type="button"
+              (click)="resetAllFilters()"
+              class="px-3 py-1.5 rounded-full text-[11px] font-display font-bold text-red-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 transition-colors flex items-center gap-1">
+              <svg class="w-3.5 h-3.5 stroke-current stroke-[2]" viewBox="0 0 24 24" fill="none">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+              <span>Limpiar Filtros</span>
             </button>
           }
         </div>
@@ -134,8 +245,16 @@ import { CategoryTree } from '../../core/models/category.model';
               No se encontraron publicaciones
             </h3>
             <p class="text-xs font-sans text-zinc-500 max-w-sm mx-auto">
-              Intenta buscar con otros términos o seleccionando otra categoría.
+              Intenta con otros términos de búsqueda o probá limpiar los filtros activos.
             </p>
+            @if (hasActiveFilters()) {
+              <button 
+                type="button"
+                (click)="resetAllFilters()"
+                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-fluor text-carbon-950 font-display font-bold text-xs shadow-sm hover:bg-fluor-hover transition-all">
+                Restablecer todos los filtros
+              </button>
+            }
           </div>
         } @else {
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -224,19 +343,78 @@ import { CategoryTree } from '../../core/models/category.model';
     </div>
   `
 })
-export class CatalogComponent implements OnInit {
+export class CatalogComponent implements OnInit, OnDestroy {
   private readonly catalogService = inject(CatalogService);
+
+  @ViewChild('carouselContainer') carouselContainer?: ElementRef<HTMLDivElement>;
+
+  // Rotador Dinámico del Hero Section
+  heroWords = ['Avión', 'Helicóptero', 'Dron', 'Aeromodelo', 'Repuestos', 'Autos'];
+  currentWordIndex = signal<number>(0);
+  currentHeroWord = computed(() => this.heroWords[this.currentWordIndex()]);
+  private wordRotationTimer: any;
 
   categories = signal<CategoryTree[]>([]);
   publications = signal<PublicationCard[]>([]);
   loading = signal<boolean>(true);
+
+  // Estados de Filtros Reactivos
   searchQuery = signal<string>('');
   selectedCategorySlug = signal<string | null>(null);
+  selectedSubcategorySlug = signal<string | null>(null);
+  selectedOnlyStores = signal<boolean | null>(null);
+  selectedCondition = signal<ItemCondition | null>(null);
+  selectedCurrency = signal<Currency | null>(null);
   selectedSort = signal<string>('recent');
 
+  private searchDebounceTimer: any;
+
+  // Subcategorías de la categoría actualmente activa
+  activeSubcategories = computed<CategoryTree[]>(() => {
+    const activeSlug = this.selectedCategorySlug();
+    if (!activeSlug) return [];
+
+    const parent = this.categories().find(c => c.slug === activeSlug);
+    return parent?.subcategories || [];
+  });
+
+  hasActiveFilters = computed<boolean>(() => {
+    return !!(
+      this.searchQuery() ||
+      this.selectedCategorySlug() ||
+      this.selectedSubcategorySlug() ||
+      this.selectedOnlyStores() !== null ||
+      this.selectedCondition() !== null ||
+      this.selectedCurrency() !== null
+    );
+  });
+
   ngOnInit(): void {
+    this.startHeroWordRotation();
     this.loadCategories();
     this.loadPublications();
+  }
+
+  ngOnDestroy(): void {
+    if (this.wordRotationTimer) {
+      clearInterval(this.wordRotationTimer);
+    }
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+    }
+  }
+
+  startHeroWordRotation(): void {
+    this.wordRotationTimer = setInterval(() => {
+      this.currentWordIndex.update(i => (i + 1) % this.heroWords.length);
+    }, 2200);
+  }
+
+  scrollCarousel(direction: 'left' | 'right'): void {
+    if (this.carouselContainer) {
+      const offset = direction === 'left' ? -280 : 280;
+      this.carouselContainer.nativeElement.scrollBy({ left: offset, behavior: 'smooth' });
+    }
   }
 
   loadCategories(): void {
@@ -248,9 +426,15 @@ export class CatalogComponent implements OnInit {
 
   loadPublications(): void {
     this.loading.set(true);
+
+    const effectiveSlug = this.selectedSubcategorySlug() || this.selectedCategorySlug() || undefined;
+
     this.catalogService.getPublications({
       search: this.searchQuery() || undefined,
-      categorySlug: this.selectedCategorySlug() || undefined,
+      categorySlug: effectiveSlug,
+      onlyStores: this.selectedOnlyStores() ?? undefined,
+      condition: this.selectedCondition() || undefined,
+      currency: this.selectedCurrency() || undefined,
       sort: this.selectedSort(),
       size: 40
     }).subscribe({
@@ -267,7 +451,12 @@ export class CatalogComponent implements OnInit {
 
   onSearchChange(value: string): void {
     this.searchQuery.set(value);
-    this.loadPublications();
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+    }
+    this.searchDebounceTimer = setTimeout(() => {
+      this.loadPublications();
+    }, 300);
   }
 
   clearSearch(): void {
@@ -277,11 +466,47 @@ export class CatalogComponent implements OnInit {
 
   selectCategory(slug: string | null): void {
     this.selectedCategorySlug.set(slug);
+    this.selectedSubcategorySlug.set(null);
+    this.loadPublications();
+  }
+
+  selectSubcategory(subSlug: string): void {
+    if (this.selectedSubcategorySlug() === subSlug) {
+      this.selectedSubcategorySlug.set(null);
+    } else {
+      this.selectedSubcategorySlug.set(subSlug);
+    }
+    this.loadPublications();
+  }
+
+  setOnlyStores(val: boolean | null): void {
+    this.selectedOnlyStores.set(val);
+    this.loadPublications();
+  }
+
+  onConditionChange(cond: ItemCondition | null): void {
+    this.selectedCondition.set(cond);
+    this.loadPublications();
+  }
+
+  onCurrencyChange(curr: Currency | null): void {
+    this.selectedCurrency.set(curr);
     this.loadPublications();
   }
 
   onSortChange(sort: string): void {
     this.selectedSort.set(sort);
+    this.loadPublications();
+  }
+
+  resetAllFilters(): void {
+    this.searchQuery.set('');
+    this.selectedCategorySlug.set(null);
+    this.selectedSubcategorySlug.set(null);
+    this.selectedOnlyStores.set(null);
+    this.selectedCondition.set(null);
+    this.selectedCurrency.set(null);
+    this.selectedSort.set('recent');
     this.loadPublications();
   }
 
@@ -291,7 +516,6 @@ export class CatalogComponent implements OnInit {
         window.open(res.whatsappUrl, '_blank', 'noopener,noreferrer');
       },
       error: () => {
-        // Fallback genérico si la petición falla
         const text = encodeURIComponent(`¡Hola! Te consulto por tu aviso en AeroFeria: "${item.title}". ¿Sigue disponible?`);
         window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer');
       }

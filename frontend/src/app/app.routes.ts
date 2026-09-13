@@ -23,6 +23,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/store-detail/store-detail.component').then(m => m.StoreDetailComponent)
   },
   {
+    path: 'publicar',
+    loadComponent: () => import('./features/publish/publish.component').then(m => m.PublishComponent)
+  },
+  {
     path: '**',
     redirectTo: 'catalogo'
   }
