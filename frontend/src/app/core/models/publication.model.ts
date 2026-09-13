@@ -101,3 +101,17 @@ export interface PageResponse<T> {
   number: number;
   empty: boolean;
 }
+
+export interface CreatePublicationPayload {
+  title: string;
+  categoryId: number;
+  condition: ItemCondition;
+  price: number;
+  currency: Currency;
+  locationProvince?: string;
+  locationCity?: string;
+  videoUrl?: string;
+  description: string;
+  imageUrls?: string[];
+}
+

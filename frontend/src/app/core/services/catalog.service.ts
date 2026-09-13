@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { CatalogFilter, PageResponse, PublicationCard, PublicationDetail, WhatsAppClickResponse } from '../models/publication.model';
+import { CatalogFilter, CreatePublicationPayload, PageResponse, PublicationCard, PublicationDetail, WhatsAppClickResponse } from '../models/publication.model';
 import { CategoryTree, PublicStats } from '../models/category.model';
 
 @Injectable({
@@ -45,5 +45,9 @@ export class CatalogService {
 
   getPublicStats(): Observable<PublicStats> {
     return this.http.get<PublicStats>(`${this.baseUrl}/stats`);
+  }
+
+  createPublication(payload: CreatePublicationPayload): Observable<PublicationDetail> {
+    return this.http.post<PublicationDetail>(`${this.baseUrl}/publications`, payload);
   }
 }

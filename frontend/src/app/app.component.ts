@@ -1,11 +1,13 @@
-import { Component, signal, effect } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, signal, effect, inject } from '@angular/core';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AuthService } from './core/services/auth.service';
+import { AuthModalComponent } from './shared/components/auth-modal/auth-modal.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, AuthModalComponent],
   template: `
     <div class="min-h-screen flex flex-col bg-[#F8F8F9] dark:bg-carbon-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-300">
       
@@ -37,7 +39,7 @@ import { CommonModule } from '@angular/common';
             </a>
           </nav>
 
-          <!-- Acciones de Cabecera: Modo Oscuro/Claro + Botón Publicar -->
+          <!-- Acciones de Cabecera: Modo Oscuro/Claro + Perfil + Botón Publicar -->
           <div class="flex items-center gap-3">
             
             <!-- Conmutador de Tema (Luz / Carbón) -->
@@ -59,8 +61,40 @@ import { CommonModule } from '@angular/common';
               }
             </button>
 
+            <!-- Estado de Autenticación del Usuario -->
+            @if (authService.isAuthenticated()) {
+              <div class="flex items-center gap-2">
+                <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/5 dark:bg-carbon-850 border border-black/5 dark:border-carbon-border text-xs font-display font-medium text-zinc-800 dark:text-zinc-200">
+                  <svg class="w-3.5 h-3.5 stroke-current stroke-[2]" viewBox="0 0 24 24" fill="none">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke-linecap="round"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                  <span class="truncate max-w-[120px]">{{ authService.currentUser()?.fullName }}</span>
+                </div>
+
+                <button 
+                  (click)="authService.logout()" 
+                  title="Cerrar Sesión"
+                  class="p-2 rounded-full text-zinc-400 hover:text-red-500 hover:bg-red-500/10 transition-colors">
+                  <svg class="w-4 h-4 stroke-current stroke-[2]" viewBox="0 0 24 24" fill="none">
+                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            } @else {
+              <button 
+                type="button"
+                (click)="authService.openAuthModal('login')"
+                class="hidden sm:inline-flex px-4 py-2 rounded-full text-xs font-display font-bold text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white transition-colors">
+                Iniciar Sesión
+              </button>
+            }
+
             <!-- Botón Publicar en Amarillo Flúor -->
-            <button class="flex items-center gap-1.5 px-5 py-2 rounded-full bg-fluor text-carbon-950 font-display font-bold text-xs md:text-sm tracking-wide shadow-fluor-glow hover:bg-fluor-hover active:scale-[0.96] transition-all duration-200">
+            <button 
+              type="button"
+              (click)="onPublishClick()"
+              class="flex items-center gap-1.5 px-5 py-2 rounded-full bg-fluor text-carbon-950 font-display font-bold text-xs md:text-sm tracking-wide shadow-fluor-glow hover:bg-fluor-hover active:scale-[0.96] transition-all duration-200">
               <svg class="w-4 h-4 stroke-current stroke-[2.5]" viewBox="0 0 24 24" fill="none">
                 <path d="M12 5v14M5 12h14" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
@@ -86,10 +120,15 @@ import { CommonModule } from '@angular/common';
           </p>
         </div>
       </footer>
+
+      <!-- Modal Global de Autenticación -->
+      <app-auth-modal></app-auth-modal>
     </div>
   `
 })
 export class AppComponent {
+  readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
   isDark = signal<boolean>(true);
 
   constructor() {
@@ -111,5 +150,17 @@ export class AppComponent {
 
   toggleTheme(): void {
     this.isDark.update(v => !v);
+  }
+
+  onPublishClick(): void {
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/publicar']);
+    } else {
+      this.authService.openAuthModal(
+        'register',
+        'Para publicar en AeroFeria necesitas registrarte. Los compradores se contactarán a tu WhatsApp.',
+        '/publicar'
+      );
+    }
   }
 }
