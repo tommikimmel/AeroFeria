@@ -96,7 +96,7 @@
 | Código | Dimensión | Criterio de Aceptación |
 | :--- | :--- | :--- |
 | **RNF-01** | **Rendimiento** | Tiempo de respuesta de las APIs de lectura < 250ms en percentil 95. Carga de la página inicial (First Contentful Paint) < 1.2 segundos. |
-| **RNF-02** | **Estética y UI/UX** | Diseño minimalista, elegante y espacioso, siguiendo los principios de Human Interface Guidelines de Apple (bordes redondeados continuos `rounded-2xl`, desenfoque de fondo `backdrop-blur`, paleta monocromática con acentos sutiles, micro-interacciones suaves). |
+| **RNF-02** | **Estética, Iconos y Animaciones** | Paleta bimodal: Blanco Puro (Light) y Negro Carbón Mate (Dark) con acentos en Amarillo Flúor (`#D4FF00`). **Prohibición total de emojis**: 100% iconos vectoriales SVG. **Exactamente dos tipografías**: Syne (display/titulares) e Inter (cuerpo/interfaz). **Animación integral**: microinteracciones táctiles (`active:scale-[0.97]`), elevación fluida de cards, modales spring y transiciones suaves. |
 | **RNF-03** | **Optimización de Medios** | Procesamiento automático de imágenes subidas: redimensionamiento y conversión a formato moderno **WebP** para reducir el peso en un 70% sin perder nitidez. |
 | **RNF-04** | **Seguridad y Cero Exposición** | Hashing BCrypt (cost factor 12). Tokens JWT HMAC-SHA256 (24h). El backend Spring Boot no expone puertos públicos hacia internet; corre en red interna privada Docker accesible únicamente por Nginx. |
 | **RNF-05** | **Disponibilidad y Despliegue** | Infraestructura 100% contenida en Docker Compose (Nginx Gateway, Spring Boot API, PostgreSQL 16 y volumen persistente de imágenes WebP). |

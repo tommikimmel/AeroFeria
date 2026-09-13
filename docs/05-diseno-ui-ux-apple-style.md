@@ -1,53 +1,119 @@
-# Guía de Diseño UI/UX — Estética Apple & Sistema de Componentes
+# Guía de Diseño UI/UX — Identidad Visual, Tipografía y Sistema de Movimiento
 **Proyecto:** AeroFeria — Marketplace de Compra-Venta para Aeromodelismo  
-**Perfil:** Analista de Sistemas Senior & UX Lead  
-**Versión:** 1.0  
+**Perfil:** Analista de Sistemas Senior & Lead UI/UX Designer  
+**Versión:** 2.0 (High-Tech Carbon & Fluor Yellow Edition)  
 
 ---
 
-## 1. Filosofía de Diseño: "Apple Simplicity" aplicada al Aeromodelismo
+## 1. Directivas Obligatorias de Estilo
 
-El aeromodelismo es un hobby altamente técnico y visual. Los usuarios aprecian la precisión mecánica, la electrónica de calidad y la estética de los modelos a escala. La interfaz de **AeroFeria** debe reflejar ese mismo nivel de artesanía y cuidado:
-
-1. **Claridad Absoluta (Clarity):** El producto es el protagonista indiscutido. Cero banners invasivos, cero distracciones o publicidad estridente.
-2. **Materiales y Profundidad Sutil (Depth & Translucency):** Uso refinado de vidrio esmerilado (*frosted glass / backdrop blur*), bordes finos de 1px con semitransparencia y sombras suaves multicapa.
-3. **Contención Cromática (Color Restraint):** Fondo neutro y limpio (blanco puro / zinc claro en modo luz; grafito profundo en modo oscuro). Los colores brillantes se reservan para:
-   * **Azul Apple (`#0071E3`)**: Acciones primarias de navegación y selección.
-   * **Verde WhatsApp (`#25D366`)**: Exclusivo para el botón de contacto directo, dándole máxima visibilidad y tasa de conversión.
-4. **Respuesta Táctil y Microinteracciones:** Botones con retroalimentación física instantánea (`active:scale-[0.98]`), transiciones suaves en 150-200ms con curvas de aceleración naturales (`cubic-bezier(0.16, 1, 0.3, 1)`).
+### 1.1. Regla de Oro: Prohibición Total de Emojis (Zero Emojis Policy)
+* **Queda estrictamente prohibido el uso de emojis Unicode (`✈️`, `🔥`, `🏷️`, `📦`, `✅`, etc.) en cualquier parte de la interfaz**, incluyendo títulos, botones, badges, modales, alertas o placeholders.
+* **100% Iconografía Vectorial SVG:** Toda señalética visual debe ser implementada mediante **iconos SVG vectoriales limpios** (familia Lucide Icons o SVG inline) con grosor de trazo uniforme (*stroke-width: 1.5px / 2px*), garantizando una estética técnica, sobria y profesional de nivel Apple/Aeronáutico.
 
 ---
 
-## 2. Tokens de Diseño (Tailwind CSS Config)
+### 1.2. Sistema de Color Bimodal: Blanco Puro & Negro Carbón con Amarillo Flúor
 
-### 2.1. Paleta de Colores
+La paleta se inspira en la ingeniería de competición y los composites de fibra de carbono utilizados en los aeromodelos de alto rendimiento:
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        PALETA CROMÁTICA OFICIAL                        │
+├────────────────────────────────┬───────────────────────────────────────┤
+│ MODO CLARO (Light Mode)        │ MODO OSCURO (Dark Mode)               │
+├────────────────────────────────┼───────────────────────────────────────┤
+│ • Fondo Base: Blanco Puro      │ • Fondo Base: Negro Carbón Mate       │
+│   (#FFFFFF / #F8F8F9)          │   (#0A0A0B / #121214 / #18181B)       │
+│ • Superficies: Blanco Vidrio   │ • Superficies: Vidrio Carbón          │
+│   (bg-white/80 backdrop-blur)  │   (bg-zinc-900/70 backdrop-blur-xl)   │
+│ • Texto Principal: Zinc 950    │ • Texto Principal: Blanco Zinc 50     │
+│   (#09090B)                    │   (#FAFAFA)                           │
+├────────────────────────────────┴───────────────────────────────────────┤
+│ ACENTO ENERGÉTICO UNIVERSAL: Amarillo Flúor (Electric Fluor Volt)      │
+│ • Color: #D4FF00 (Hex) / #CCFF00 (Hover)                              │
+│ • Función: Botones primarios, foco interactivo, badges de alta         │
+│   relevancia, halos sutiles y tags destacados.                        │
+│ • Accesibilidad: Texto interior siempre en Negro Carbón (#0A0A0B)      │
+│   para garantizar ratio de contraste AAA (> 12:1).                     │
+├────────────────────────────────────────────────────────────────────────┤
+│ ACENTO DE CONVERSIÓN: Verde WhatsApp (#25D366)                        │
+│ • Exclusivo y reservado para el CTA de contacto directo.               │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 1.3. Las 2 Familias Tipográficas Oficiales
+
+Para preservar pureza visual y máxima coherencia, la plataforma utiliza **exactamente dos tipografías**:
+
+```mermaid
+flowchart LR
+    subgraph T1["Tipografía 1: Display / Headings"]
+        D1["Syne / Plus Jakarta Sans\n(font-display)\n- Títulos de sección (h1, h2, h3)\n- Nombre del marketplace\n- Cifras de precios prominentes\n- Tracking tight (-0.03em)"]
+    end
+
+    subgraph T2["Tipografía 2: Body / Interface"]
+        D2["Inter\n(font-sans)\n- Cuerpo de texto y descripciones\n- Formularios, labels e inputs\n- Metadatos técnicos y tablas admin\n- Números tabulares legibles"]
+    end
+```
+
+1. **Tipografía Display (`font-display`):** `Syne` (con fallback a `Plus Jakarta Sans`, `sans-serif`).
+   * **Uso:** Logotipo "AeroFeria", encabezados de sección, nombres de modelos (ej. *Extra 330SC 35%*), banners y números de precio principales. Transmite potencia, dinamismo aerodinámico y modernidad.
+2. **Tipografía de Interfaz (`font-sans`):** `Inter` (con fallback a `-apple-system, BlinkMacSystemFont, sans-serif`).
+   * **Uso:** Todo el texto de lectura, especificaciones técnicas de motores/baterías, selectores, breadcrumbs, formularios y tablas del panel de administración. Optimizado para legibilidad extrema en pantallas móviles.
+
+---
+
+### 1.4. Doctrina de Movimiento: "Todo Debe Tener Animaciones" (Motion System)
+
+Cada elemento interactivo debe responder a la física con naturalidad y fluidez:
+
+| Tipo de Animación | Propiedades CSS / Tailwind | Curva & Duración | Propósito UX |
+| :--- | :--- | :--- | :--- |
+| **Tap / Click Feedback** | `active:scale-[0.97]` | `cubic-bezier(0.2, 0.8, 0.2, 1)` (150ms) | Sensación táctil de pulsador físico en botones y cards. |
+| **Elevación de Card** | `hover:-translate-y-1.5 hover:shadow-2xl hover:border-fluor/40` | `ease-out` (250ms) | El producto se "despega" hacia el usuario al pasar el cursor. |
+| **Entrada Escalonada (Stagger)** | `opacity-0 translate-y-3 -> opacity-100 translate-y-0` | Stagger incremental `50ms` por card | Carga suave del catálogo como una cascada elegante. |
+| **Apertura de Modales** | `scale-95 opacity-0 -> scale-100 opacity-100` | Spring Apple `cubic-bezier(0.16, 1, 0.3, 1)` (300ms) | Diálogos que brotan con suavidad desde el centro. |
+| **Transición Modo Día/Noche**| `transition-colors duration-300` | `ease-in-out` | Cambio orgánico de fondo blanco a negro carbón. |
+| **Skeleton Pulse Flúor** | `animate-pulse bg-zinc-200 dark:bg-zinc-800` | 1.5s loop | Estados de carga con reflejo sutil de amarillo flúor. |
+
+---
+
+## 2. Configuración de Tokens en Tailwind CSS
 
 ```javascript
-// tailwind.config.js - Extensión de Tema
+// tailwind.config.js
 module.exports = {
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        apple: {
-          blue: '#0071E3',
-          'blue-hover': '#0077ED',
-          dark: '#1D1D1F',
-          gray: '#86868B',
-          light: '#F5F5F7',
-          card: '#FFFFFF',
-          border: 'rgba(0, 0, 0, 0.08)'
+        // Amarillo Flúor de Alto Rendimiento
+        fluor: {
+          DEFAULT: '#D4FF00',
+          hover: '#C2EB00',
+          light: '#E6FF4D',
+          glow: 'rgba(212, 255, 0, 0.25)'
         },
+        // Negro Carbón Mate para Modo Oscuro
+        carbon: {
+          950: '#0A0A0B', // Fondo más profundo
+          900: '#121214', // Fondos de tarjetas elevadas
+          850: '#18181B', // Superficies y controles
+          800: '#27272A', // Bordes sutiles
+          border: 'rgba(255, 255, 255, 0.08)'
+        },
+        // Verde Oficial de Conversión WhatsApp
         whatsapp: {
           DEFAULT: '#25D366',
-          hover: '#20BD5A',
-          dark: '#128C7E'
-        },
-        status: {
-          pending: '#F59E0B',
-          active: '#10B981',
-          rejected: '#EF4444',
-          sold: '#6B7280'
+          hover: '#20BD5A'
         }
+      },
+      fontFamily: {
+        display: ['Syne', 'Plus Jakarta Sans', 'sans-serif'],
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif']
       },
       borderRadius: {
         'apple-sm': '10px',
@@ -56,112 +122,88 @@ module.exports = {
         'apple-xl': '32px'
       },
       boxShadow: {
-        'apple-subtle': '0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06)',
-        'apple-hover': '0 12px 32px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04)',
-        'apple-modal': '0 24px 48px rgba(0, 0, 0, 0.16)'
+        'fluor-glow': '0 0 20px rgba(212, 255, 0, 0.35)',
+        'apple-card': '0 4px 24px -1px rgba(0, 0, 0, 0.06), 0 2px 8px -1px rgba(0, 0, 0, 0.04)',
+        'apple-card-dark': '0 4px 24px -1px rgba(0, 0, 0, 0.4), 0 2px 8px -1px rgba(0, 0, 0, 0.2)'
       }
     }
   }
 }
 ```
 
-### 2.2. Tipografía
-* **Familia Primaria:** `SF Pro Display`, `SF Pro Text`, con fallback nativo a `-apple-system, BlinkMacSystemFont, "Inter", sans-serif`.
-* **Reglas tipográficas:**
-  * Títulos de sección: `font-semibold text-2xl tracking-tight text-apple-dark`.
-  * Precios: `font-bold text-xl tracking-tight text-apple-dark` con badge de moneda en tipografía monospaciada o medium destacada.
-  * Metadatos (condición, fecha, club): `text-xs font-medium text-apple-gray uppercase tracking-wider`.
+---
+
+## 3. Especificación de Componentes con Animaciones
+
+### 3.1. Barra de Navegación (Header con Vidrio Esmerilado)
+* **Estilo:**
+  * Modo Claro: `bg-white/80 backdrop-blur-xl border-b border-black/[0.06]`
+  * Modo Oscuro: `bg-carbon-950/80 backdrop-blur-xl border-b border-white/[0.08]`
+* **Contenido:**
+  * **Logo AeroFeria:** Texto en `font-display font-bold tracking-tight text-xl` con punto flúor animado (`<span class="inline-block w-2 h-2 rounded-full bg-fluor ml-1 animate-pulse"></span>`).
+  * **Botón + Publicar:** Botón redondeado en amarillo flúor de alta energía:
+    ```html
+    <button class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-fluor text-carbon-950 font-display font-bold text-sm tracking-wide shadow-fluor-glow hover:bg-fluor-hover active:scale-[0.96] transition-all duration-200">
+      <!-- Icono SVG de Plus (Cero emojis) -->
+      <svg class="w-4 h-4 stroke-current stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M12 5v14M5 12h14" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>Publicar</span>
+    </button>
+    ```
 
 ---
 
-## 3. Especificación de Componentes Clave
-
-### 3.1. Barra de Navegación Superior (Apple Translucent Header)
-* **Comportamiento:** `sticky top-0 z-50 w-full` con efecto frosted glass:
+### 3.2. Card de Producto (Apple Card con Borde Sensible y Micro-elevación)
+* **Contenedor:**
   ```html
-  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-black/[0.06] transition-all">
+  <div class="group relative rounded-apple-lg overflow-hidden bg-white dark:bg-carbon-900 border border-black/[0.06] dark:border-carbon-border transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-2xl hover:border-fluor/50">
   ```
-* **Contenido:**
-  * Logotipo minimalista: Icono de planeador/hélice en trazo fino + texto "AeroFeria".
-  * Buscador rápido integrado tipo *Spotlight* con atajo rápido (`cmd + k` o botón visual).
-  * Selector / Tabs rápidos de categorías.
-  * Botón CTA destacado estilo Apple: `+ Publicar` (`bg-apple-blue text-white rounded-full px-5 py-2 font-medium shadow-sm hover:bg-apple-blue-hover active:scale-95`).
-  * Perfil / Acceso Admin.
+* **Elementos Clave:**
+  * **Imagen del Modelo:** Proporción 4:3 con zoom fluido en hover (`group-hover:scale-105 transition-transform duration-500 ease-out`).
+  * **Pill de Condición:** Chip translúcido con icono SVG de escudo o engranaje técnico.
+  * **Badge de Tienda Oficial:**
+    ```html
+    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-fluor text-carbon-950 text-xs font-display font-bold uppercase tracking-wider shadow-sm">
+      <svg class="w-3.5 h-3.5 stroke-current stroke-[2.5]" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5"/></svg>
+      HobbyMotors
+    </span>
+    ```
+  * **Precio:** Tipografía `font-display font-extrabold text-2xl text-zinc-950 dark:text-white tracking-tight`.
 
-### 3.2. Card de Producto (Apple Style Product Card)
-* **Estructura visual:**
-  * Esquinas muy redondeadas: `rounded-2xl` (`overflow-hidden border border-black/[0.06] bg-white transition-all duration-300 hover:shadow-apple-hover hover:-translate-y-1`).
-  * Fotografía principal: Proporción 4:3 con fondo neutro `bg-[#F5F5F7]` para destacar fuselajes y alas completas.
-  * Tag flotante de condición: Pill superior izquierda (`bg-white/90 backdrop-blur-sm text-xs font-semibold px-2.5 py-1 rounded-full text-zinc-700 shadow-sm`).
-  * **Badge de Tienda Oficial Verificada (si aplica):**
-    * Pill inferior izquierda en la foto o sobre el título: `inline-flex items-center gap-1.5 bg-blue-50/90 backdrop-blur-sm text-apple-blue font-semibold text-xs px-2.5 py-1 rounded-full border border-blue-200/50`.
-    * Incluye icono de check azul estilo Apple y nombre de la tienda (ej. `✓ HobbyMotors`).
-  * Tag de moneda y precio:
-    * Si es **USD**: Badge verde esmeralda suave (`bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded-md text-sm`).
-    * Si es **ARS**: Badge neutral elegante (`bg-zinc-100 text-zinc-800 font-bold px-2 py-0.5 rounded-md text-sm`).
-  * Pie de tarjeta: Localidad del vendedor y botón de guardado rápido o acceso directo a ficha.
+---
 
-### 3.3. Botón de Contacto por WhatsApp (Hero Action)
-* El componente más importante de conversión en la ficha de producto.
-* **Diseño:**
+### 3.3. Botón Hero de WhatsApp (Máxima Conversión)
+* **Diseño e Interacción:**
   ```html
-  <a href="https://wa.me/5491112345678?text=..." 
-     target="_blank"
-     class="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white font-semibold text-lg shadow-lg shadow-emerald-500/20 transition-all duration-200 active:scale-[0.98]">
-    <!-- Icono SVG de WhatsApp -->
-    <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">...</svg>
-    <span>Contactar por WhatsApp</span>
+  <a href="..." class="relative group w-full flex items-center justify-center gap-3 py-4 px-6 rounded-full bg-whatsapp hover:bg-whatsapp-hover text-white font-sans font-semibold text-base shadow-lg shadow-emerald-500/20 active:scale-[0.97] transition-all duration-200 overflow-hidden">
+    <!-- SVG Icono WhatsApp oficial (Sin emojis) -->
+    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+      <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654z..."/>
+    </svg>
+    <span>Consultar por WhatsApp</span>
   </a>
   ```
-* Proporciona seguridad y transparencia mostrando el nombre del aeromodelista y el mensaje preconfeccionado para eliminar la fricción del primer contacto.
 
-### 3.4. Formulario de Publicación Rápida (Zero Friction Wizard)
-* Formulario estructurado en 3 pasos simples o tarjeta única colapsable:
-  1. **¿Qué estás vendiendo?** Título, Categoría y Condición del artículo.
-  2. **Fotografías y Video:** Área de Drag & Drop para arrastrar hasta 6 fotos (con previsualización instantánea) + campo opcional para link de YouTube de prueba de vuelo.
-  3. **Precio y Ubicación:** Selector conmutador de moneda tipo toggle (ARS / USD), importe numérico y confirmación de número de WhatsApp.
+---
 
-### 3.5. Panel de Administración y Moderación
-* **Segmented Controls (Estilo iOS / macOS Settings):**
-  * Selector de estado: `[ Todas (42) | Pendientes (5) | Activas (34) | Rechazadas (3) ]`.
-* **Tabla de Inspección Rápida:**
-  * Miniatura de foto + Título + Vendedor + Precio + Fecha.
-  * Acciones instantáneas de un click con confirmación modal limpia:
-    * Botón verde esmeralda `Aprobar`.
-    * Botón ámbar `Rechazar` (despliega campo corto para motivo: "Faltan fotos reales", "Precio no especificado").
-    * Botón rojo `Eliminar definitivamente`.
+### 3.4. Vitrina de Tienda Oficial (`/tiendas/:slug`)
+* **Header Panorámico:** Portada de 280px con efecto parallax sutil y marco inferior redondeado (`rounded-b-apple-xl`).
+* **Marcas Representadas (Fila Flúor Interactiva):**
+  * Chips con borde carbón y hover reactivo en amarillo flúor:
+  ```html
+  <button class="px-4 py-1.5 rounded-full text-xs font-display font-bold border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-carbon-850 text-zinc-800 dark:text-zinc-200 hover:border-fluor hover:text-fluor active:scale-95 transition-all duration-200">
+    Futaba
+  </button>
+  ```
 
-### 3.6. Vitrina de Tienda Oficial / Storefront (`/tiendas/:slug`)
-Diseño inspirado en los espacios de marca de Apple Store:
-* **Header de Marca y Portada Panorámica:**
-  * Portada panorámica inmersiva en formato cinematográfico (`h-56 md:h-80 w-full object-cover rounded-3xl shadow-sm`).
-  * Tarjeta de identidad flotante sobre el banner con efecto translúcido:
-    * Avatar/Logo circular de la tienda (`w-24 h-24 rounded-full border-4 border-white shadow-apple-subtle bg-white object-contain p-2`) con tilde azul de verificación.
-    * Nombre comercial en tipografía destacada (`font-bold text-2xl md:text-3xl tracking-tight text-zinc-900`).
-    * Badges informativos: Dirección del local con link a Google Maps, horario de atención, enlace web externo y cuenta de Instagram.
-    * Badge de cobertura: *"Envíos a todo el país"* (`bg-zinc-100 text-zinc-700 text-xs font-semibold px-2.5 py-1 rounded-full`).
-    * Botón principal de contacto: *"Chatear con el local por WhatsApp"* (`bg-[#25D366] hover:bg-[#20BD5A] text-white rounded-full px-6 py-2.5 font-semibold shadow-md active:scale-95 transition-all`).
-* **Carrusel / Fila de Marcas Oficiales Representadas:**
-  * Franja horizontal de chips minimalistas con los fabricantes que la tienda distribuye (ej. `[ Futaba ]`, `[ O.S. Engines ]`, `[ Spektrum ]`, `[ FrSky ]`, `[ DLE ]`, `[ Saito ]`, `[ Align ]`):
-    ```html
-    <div class="flex items-center gap-2 overflow-x-auto py-3 no-scrollbar">
-      <span class="text-xs font-semibold uppercase tracking-wider text-apple-gray">Marcas:</span>
-      <button class="px-3.5 py-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200 text-xs font-medium text-zinc-800 transition-colors">Futaba</button>
-      ...
-    </div>
-    ```
-* **Catálogo Exclusivo de la Tienda:**
-  * Barra de búsqueda reactiva dentro del inventario del local.
-  * Selector de categorías contextualizadas a los productos activos de dicha tienda.
+---
 
-### 3.7. Avatar de Usuario / Foto de Perfil (Estilo Apple ID)
-* **Diseño visual:**
-  * Imagen circular perfecta (`rounded-full aspect-square object-cover ring-2 ring-black/[0.05]`).
-  * Tamaños normalizados:
-    * Header de navegación: `w-9 h-9`.
-    * Card de producto / vendedor: `w-10 h-10`.
-    * Ficha de perfil y detalle de publicación: `w-14 h-14`.
-* **Fallback tipográfico (Monograma estilo Apple Contactos):**
-  * Si el aeromodelista no subió foto de perfil, se renderiza un avatar generado con las iniciales de su nombre (ej. "Tomás K." -> `TK`) sobre un fondo con gradiente neutro pastel (`bg-gradient-to-tr from-zinc-200 to-zinc-100 text-zinc-700 font-semibold`).
-
-
+### 3.5. Avatar de Usuario (Monograma Apple sin Emojis)
+* **Si tiene foto:** `<img class="w-10 h-10 rounded-full object-cover ring-2 ring-fluor/40">`
+* **Si no tiene foto (Fallback tipográfico):**
+  ```html
+  <div class="w-10 h-10 rounded-full flex items-center justify-center bg-carbon-900 text-fluor font-display font-bold text-sm ring-1 ring-white/10">
+    TK
+  </div>
+  ```
