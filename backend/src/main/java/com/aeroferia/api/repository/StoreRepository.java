@@ -10,6 +10,8 @@ import java.util.Optional;
 @Repository
 public interface StoreRepository extends JpaRepository<Store, Long> {
     Optional<Store> findBySlug(String slug);
+    Optional<Store> findBySlugAndIsActiveTrue(String slug);
+    Optional<Store> findByUserId(Long userId);
     List<Store> findByIsActiveTrueOrderByIsVerifiedDescNameAsc();
     boolean existsBySlug(String slug);
 }
