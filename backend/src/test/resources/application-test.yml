@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:aeroferia_test_db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ''
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+  threads:
+    virtual:
+      enabled: false
+
+aeroferia:
+  jwt:
+    secret: aeroferia_test_ultra_secure_jwt_token_secret_2026_at_least_256_bits_length!
+    expiration-ms: 3600000
+  admin:
+    initial-email: admin@test.com
+    initial-password: AdminTestPassword123!
+    initial-name: Admin Tester
+    initial-phone: 5491112345678
+  upload:
+    dir: target/test-uploads
