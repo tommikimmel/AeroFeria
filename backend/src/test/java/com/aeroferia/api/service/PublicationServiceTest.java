@@ -295,4 +295,47 @@ class PublicationServiceTest {
         assertThat(card.getIsVerifiedStore()).isFalse();
         assertThat(card.getStoreName()).isNull();
     }
+
+    @Test
+    @DisplayName("createPublication should create and persist publication with images and return detail")
+    void createPublication_shouldCreateAndReturnDetail() {
+        CreatePublicationDto dto = CreatePublicationDto.builder()
+                .title("Radio Futaba T10J")
+                .categoryId(3L)
+                .condition(ItemCondition.NEW)
+                .price(new BigDecimal("450.00"))
+                .currency(Currency.USD)
+                .locationProvince("Córdoba")
+                .locationCity("Villa Carlos Paz")
+                .description("Excelente radio para aeromodelos")
+                .imageUrls(List.of("https://img.com/1.jpg", "https://img.com/2.jpg"))
+                .build();
+
+        when(userRepository.findByEmail("carlos@rc.com")).thenReturn(Optional.of(user));
+        when(categoryRepository.findById(3L)).thenReturn(Optional.of(category));
+        when(storeRepository.findByUserId(1L)).thenReturn(Optional.of(store));
+        when(publicationRepository.save(any(Publication.class))).thenAnswer(i -> {
+            Publication p = i.getArgument(0);
+            p.setId(99L);
+            return p;
+        });
+
+        PublicationDetailDto detail = publicationService.createPublication(dto, "carlos@rc.com");
+
+        assertThat(detail).isNotNull();
+        assertThat(detail.getTitle()).isEqualTo("Radio Futaba T10J");
+        assertThat(detail.getImages()).hasSize(2);
+        assertThat(detail.getImages().getFirst().getIsCover()).isTrue();
+        verify(publicationRepository).save(any(Publication.class));
+    }
+
+    @Test
+    @DisplayName("createPublication should throw ResourceNotFoundException when user or category not found")
+    void createPublication_whenUserNotFound_shouldThrow() {
+        CreatePublicationDto dto = CreatePublicationDto.builder().build();
+        when(userRepository.findByEmail("inexistente@rc.com")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> publicationService.createPublication(dto, "inexistente@rc.com"))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
 }

@@ -1,6 +1,6 @@
 package com.aeroferia.api.service;
-
 import com.aeroferia.api.dto.*;
+import com.aeroferia.api.entity.Category;
 import com.aeroferia.api.entity.Publication;
 import com.aeroferia.api.entity.PublicationImage;
 import com.aeroferia.api.entity.Store;
@@ -95,6 +95,76 @@ public class PublicationService {
                 .totalCategories(categoryRepository.count())
                 .totalUsers(userRepository.count())
                 .build();
+    }
+
+    @Transactional
+    public PublicationDetailDto createPublication(CreatePublicationDto dto, String userEmail) {
+        User user = userRepository.findByEmail(userEmail.trim().toLowerCase())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "email", userEmail));
+
+        Category category = categoryRepository.findById(dto.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Categoría", "id", dto.getCategoryId()));
+
+        Store store = storeRepository.findByUserId(user.getId()).orElse(null);
+
+        String baseSlug = slugify(dto.getTitle());
+        String slug = baseSlug + "-" + (System.currentTimeMillis() % 1000000);
+
+        String province = dto.getLocationProvince() != null && !dto.getLocationProvince().isBlank()
+                ? dto.getLocationProvince().trim()
+                : (user.getLocationProvince() != null ? user.getLocationProvince() : "Buenos Aires");
+
+        String city = dto.getLocationCity() != null && !dto.getLocationCity().isBlank()
+                ? dto.getLocationCity().trim()
+                : (user.getLocationCity() != null ? user.getLocationCity() : "CABA");
+
+        Publication pub = Publication.builder()
+                .user(user)
+                .store(store)
+                .category(category)
+                .title(dto.getTitle().trim())
+                .slug(slug)
+                .description(dto.getDescription().trim())
+                .condition(dto.getCondition())
+                .price(dto.getPrice())
+                .currency(dto.getCurrency())
+                .locationProvince(province)
+                .locationCity(city)
+                .videoUrl(dto.getVideoUrl() != null && !dto.getVideoUrl().isBlank() ? dto.getVideoUrl().trim() : null)
+                .status(PublicationStatus.ACTIVE)
+                .viewsCount(0)
+                .whatsappClicksCount(0)
+                .build();
+
+        if (dto.getImageUrls() != null && !dto.getImageUrls().isEmpty()) {
+            int order = 1;
+            for (String imgUrl : dto.getImageUrls()) {
+                if (imgUrl != null && !imgUrl.isBlank()) {
+                    PublicationImage img = PublicationImage.builder()
+                            .publication(pub)
+                            .imageUrl(imgUrl.trim())
+                            .isCover(order == 1)
+                            .displayOrder(order++)
+                            .build();
+                    pub.getImages().add(img);
+                }
+            }
+        }
+
+        Publication saved = publicationRepository.save(pub);
+        return mapToDetailDto(saved);
+    }
+
+    private String slugify(String input) {
+        if (input == null) return "publicacion";
+        String normalized = java.text.Normalizer.normalize(input, java.text.Normalizer.Form.NFD);
+        String clean = normalized.replaceAll("\\p{M}", "")
+                .toLowerCase()
+                .replaceAll("[^a-z0-9\\s-]", "")
+                .replaceAll("\\s+", "-")
+                .replaceAll("-+", "-")
+                .replaceAll("^-|-$", "");
+        return clean.isBlank() ? "publicacion" : clean;
     }
 
     private Pageable resolvePageableWithSort(CatalogFilterDto filter, Pageable pageable) {

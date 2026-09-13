@@ -151,4 +151,30 @@ class ClientBFFControllerTest {
         assertThat(response.getBody()).isEqualTo(stats);
         verify(publicationService).getPublicStats();
     }
+
+    @Test
+    @DisplayName("createPublication should return 201 CREATED when authenticated")
+    void createPublication_whenAuthenticated_shouldReturnCreated() {
+        CreatePublicationDto dto = CreatePublicationDto.builder().title("Nuevo Aviso").build();
+        PublicationDetailDto created = PublicationDetailDto.builder().id(99L).title("Nuevo Aviso").build();
+        java.security.Principal principal = () -> "piloto@aeroferia.com";
+
+        when(publicationService.createPublication(dto, "piloto@aeroferia.com")).thenReturn(created);
+
+        ResponseEntity<PublicationDetailDto> response = controller.createPublication(dto, principal);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isEqualTo(created);
+        verify(publicationService).createPublication(dto, "piloto@aeroferia.com");
+    }
+
+    @Test
+    @DisplayName("createPublication should return 401 UNAUTHORIZED when principal is null")
+    void createPublication_whenAnonymous_shouldReturnUnauthorized() {
+        CreatePublicationDto dto = CreatePublicationDto.builder().build();
+
+        ResponseEntity<PublicationDetailDto> response = controller.createPublication(dto, null);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
 }
