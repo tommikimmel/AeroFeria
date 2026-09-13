@@ -25,10 +25,13 @@ public class PublicationSpecification {
                 return cb.and(predicates.toArray(new Predicate[0]));
             }
 
+            Join<Publication, Category> categoryJoin = null;
+            Join<Category, Category> parentCategoryJoin = null;
+
             // Filtro por ID de categoría o subcategoría
             if (filter.getCategoryId() != null) {
-                Join<Publication, Category> categoryJoin = root.join("category", JoinType.LEFT);
-                Join<Category, Category> parentCategoryJoin = categoryJoin.join("parent", JoinType.LEFT);
+                categoryJoin = root.join("category", JoinType.LEFT);
+                parentCategoryJoin = categoryJoin.join("parent", JoinType.LEFT);
                 predicates.add(cb.or(
                         cb.equal(categoryJoin.get("id"), filter.getCategoryId()),
                         cb.equal(parentCategoryJoin.get("id"), filter.getCategoryId())
@@ -37,11 +40,14 @@ public class PublicationSpecification {
 
             // Filtro por slug de categoría o subcategoría
             if (filter.getCategorySlug() != null && !filter.getCategorySlug().isBlank()) {
-                Join<Publication, Category> categoryJoin = root.join("category", JoinType.LEFT);
-                Join<Category, Category> parentCategoryJoin = categoryJoin.join("parent", JoinType.LEFT);
+                if (categoryJoin == null) {
+                    categoryJoin = root.join("category", JoinType.LEFT);
+                    parentCategoryJoin = categoryJoin.join("parent", JoinType.LEFT);
+                }
+                String slug = filter.getCategorySlug().trim().toLowerCase();
                 predicates.add(cb.or(
-                        cb.equal(cb.lower(categoryJoin.get("slug")), filter.getCategorySlug().trim().toLowerCase()),
-                        cb.equal(cb.lower(parentCategoryJoin.get("slug")), filter.getCategorySlug().trim().toLowerCase())
+                        cb.equal(cb.lower(categoryJoin.get("slug")), slug),
+                        cb.equal(cb.lower(parentCategoryJoin.get("slug")), slug)
                 ));
             }
 
@@ -84,9 +90,13 @@ public class PublicationSpecification {
                 predicates.add(cb.equal(root.get("store").get("id"), filter.getStoreId()));
             }
 
-            // Filtro para ver únicamente publicaciones de tiendas oficiales
-            if (Boolean.TRUE.equals(filter.getOnlyStores())) {
-                predicates.add(cb.isNotNull(root.get("store")));
+            // Filtro para ver únicamente publicaciones de tiendas oficiales o particulares
+            if (filter.getOnlyStores() != null) {
+                if (filter.getOnlyStores()) {
+                    predicates.add(cb.isNotNull(root.get("store")));
+                } else {
+                    predicates.add(cb.isNull(root.get("store")));
+                }
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
