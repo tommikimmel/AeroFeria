@@ -3,14 +3,18 @@ import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/rou
 import { CommonModule } from '@angular/common';
 import { AuthService } from './core/services/auth.service';
 import { AuthModalComponent } from './shared/components/auth-modal/auth-modal.component';
+import { StarfieldComponent } from './shared/components/starfield/starfield.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, AuthModalComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, AuthModalComponent, StarfieldComponent],
   template: `
-    <div class="min-h-screen flex flex-col bg-[#F8F8F9] dark:bg-carbon-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-300">
+    <div class="relative min-h-screen flex flex-col bg-[#F8F8F9] dark:bg-carbon-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-300 overflow-x-hidden">
       
+      <!-- Fondo Atmosférico de Estrellas y Destellos Amarillo Flúor -->
+      <app-starfield></app-starfield>
+
       <!-- Navbar Superior Frosted Glass estilo Apple -->
       <header class="sticky top-0 z-50 apple-glass border-b border-black/[0.06] dark:border-white/[0.08] transition-all">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -105,12 +109,12 @@ import { AuthModalComponent } from './shared/components/auth-modal/auth-modal.co
       </header>
 
       <!-- Contenido de las Rutas -->
-      <main class="flex-1">
+      <main class="flex-1 relative z-10">
         <router-outlet></router-outlet>
       </main>
 
       <!-- Footer Minimalista Apple Style -->
-      <footer class="border-t border-black/[0.06] dark:border-white/[0.06] py-8 text-center text-xs font-sans text-zinc-500 dark:text-zinc-500">
+      <footer class="relative z-10 border-t border-black/[0.06] dark:border-white/[0.06] py-8 text-center text-xs font-sans text-zinc-500 dark:text-zinc-500">
         <div class="max-w-7xl mx-auto px-4 space-y-2">
           <p class="font-display font-semibold text-zinc-700 dark:text-zinc-400">
             AeroFeria — El marketplace del aeromodelismo argentino
